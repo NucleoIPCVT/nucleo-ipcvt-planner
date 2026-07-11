@@ -1,30 +1,24 @@
 # Núcleo IPCVT Planner
 
-Painel visual para organizar integrantes do Núcleo IPCVT por áreas e funções.
+Painel online para brainstorm de equipes e funções do Núcleo IPCVT.
 
-## Versão 0.2
+## Versão 0.4 — layout compacto
 
-- Sincronização online pelo Cloud Firestore.
-- Documento utilizado: `app_ipcvt/planner_dados`.
-- Atualizações em tempo real entre aparelhos.
-- Cópia local mantida como segurança caso a internet falhe.
-
-## Executar localmente
-
-```bash
-npm install
-npm run dev
-```
+- nomes completos em chips compactos;
+- banco de pessoas mais estreito e com quebra automática;
+- integrantes dentro das funções em etiquetas horizontais;
+- indicador por cor e contador de funções;
+- clique em uma pessoa para destacar todas as aparições;
+- arrastar para adicionar em novas funções;
+- botão × para retirar somente daquela função;
+- sincronização online pelo Cloud Firestore;
+- importação de integrantes da escala geral;
+- acesso compartilhado por senha.
 
 ## Publicação
 
-O projeto está preparado para Vite e pode ser publicado na Vercel.
+A Vercel usa as configurações de `vercel.json`:
 
-## Atenção
-
-A conexão online depende das regras do Cloud Firestore permitirem leitura e escrita no documento `app_ipcvt/planner_dados`. A versão inicial ainda não possui autenticação de usuários; adicione login e regras restritas antes de compartilhar o painel amplamente.
-
-## Versão 0.3.0
-- Tela de acesso por senha compartilhada.
-- Importação manual de integrantes do documento `app_ipcvt/escala_geral_dados`.
-- A importação adiciona somente nomes novos ao Planner e não altera a escala original.
+- instalação: `npm ci --no-audit --no-fund`;
+- build: `npm run build`;
+- saída: `dist`.

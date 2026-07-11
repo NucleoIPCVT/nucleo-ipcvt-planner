@@ -70,6 +70,7 @@ export default function App() {
   const [assignments, setAssignments] = useState(localData?.assignments ?? initialAssignments)
   const [search, setSearch] = useState('')
   const [newName, setNewName] = useState('')
+  const [selectedPersonId, setSelectedPersonId] = useState(null)
   const [cloudReady, setCloudReady] = useState(false)
   const [syncStatus, setSyncStatus] = useState('connecting')
   const [syncError, setSyncError] = useState('')
@@ -174,6 +175,10 @@ export default function App() {
   const filteredPeople = people.filter((person) =>
     person.name.toLowerCase().includes(search.trim().toLowerCase()),
   )
+
+  function selectPerson(personId) {
+    setSelectedPersonId((current) => (current === personId ? null : personId))
+  }
 
   function addPersonToRole(roleId, personId) {
     setAssignments((current) => {
@@ -297,7 +302,7 @@ export default function App() {
         <div>
           <p className="eyebrow">IPCVT</p>
           <h1>Núcleo Planner</h1>
-          <p className="subtitle">Brainstorm de equipes, funções e sobrecarga</p>
+          <p className="subtitle">Arraste nomes, teste combinações e visualize a carga da equipe</p>
           <div
             className={`sync-status sync-${syncStatus}`}
             title={syncError || 'Alterações compartilhadas pelo Cloud Firestore'}
@@ -324,8 +329,8 @@ export default function App() {
         <aside className="sidebar">
           <div className="sidebar-heading">
             <div>
-              <h2>Banco de pessoas</h2>
-              <p>{people.length} cadastradas</p>
+              <h2>Pessoas</h2>
+              <p>{people.length} nomes disponíveis</p>
             </div>
           </div>
 
@@ -356,11 +361,17 @@ export default function App() {
             <button type="submit">Adicionar</button>
           </form>
 
-          <p className="drag-help">Arraste um cartão até uma função. A mesma pessoa pode aparecer em várias áreas.</p>
+          <p className="drag-help">Arraste um nome para qualquer função. Clique nele para destacar todas as aparições.</p>
 
           <div className="people-list">
             {filteredPeople.map((person) => (
-              <PersonCard key={person.id} person={person} count={counts[person.id] ?? 0} />
+              <PersonCard
+                key={person.id}
+                person={person}
+                count={counts[person.id] ?? 0}
+                selected={selectedPersonId === person.id}
+                onSelect={selectPerson}
+              />
             ))}
           </div>
         </aside>
@@ -381,6 +392,8 @@ export default function App() {
                     assignedPeople={(assignments[role.id] ?? []).map((id) => peopleById[id]).filter(Boolean)}
                     onDropPerson={addPersonToRole}
                     onRemovePerson={removePersonFromRole}
+                    selectedPersonId={selectedPersonId}
+                    onSelectPerson={selectPerson}
                   />
                 ))}
               </div>
