@@ -18,6 +18,8 @@
     "vite": "^7.0.0"
   },
   "engines": {
-    "node": ">=20.19.0 <23"
-  }
+    "node": "20.x",
+    "npm": "10.x"
+  },
+  "packageManager": "npm@10.9.2"
 }
