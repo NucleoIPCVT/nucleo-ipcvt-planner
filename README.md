@@ -22,3 +22,10 @@ A Vercel usa as configurações de `vercel.json`:
 - instalação: `npm ci --no-audit --no-fund`;
 - build: `npm run build`;
 - saída: `dist`.
+
+
+## Etapa 5
+
+- Barra lateral recolhível em formato de gaveta.
+- Cabeçalho reduzido a uma faixa com o botão Pessoas.
+- Área útil ampliada para o brainstorm.

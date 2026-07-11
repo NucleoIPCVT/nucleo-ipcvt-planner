@@ -75,6 +75,7 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState('connecting')
   const [syncError, setSyncError] = useState('')
   const [importing, setImporting] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const saveTimer = useRef(null)
   const applyingRemoteData = useRef(false)
 
@@ -299,24 +300,16 @@ export default function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div>
-          <p className="eyebrow">IPCVT</p>
-          <h1>Núcleo Planner</h1>
-          <p className="subtitle">Arraste nomes, teste combinações e visualize a carga da equipe</p>
-          <div
-            className={`sync-status sync-${syncStatus}`}
-            title={syncError || 'Alterações compartilhadas pelo Cloud Firestore'}
-          >
-            <span className="sync-dot" />
-            {statusLabel}
-          </div>
-        </div>
-        <div className="legend" aria-label="Legenda de carga">
-          <span><i className="dot safe-dot" />1 função</span>
-          <span><i className="dot warning-dot" />2 funções</span>
-          <span><i className="dot danger-dot" />3 ou mais</span>
-          <button type="button" className="secondary-button" onClick={resetBoard}>Restaurar</button>
-        </div>
+        <button
+          type="button"
+          className="menu-button"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Abrir painel de pessoas"
+          aria-expanded={sidebarOpen}
+        >
+          <span className="menu-icon" aria-hidden="true">☰</span>
+          Pessoas
+        </button>
       </header>
 
       {syncStatus === 'error' && (
@@ -326,12 +319,43 @@ export default function App() {
       )}
 
       <main className="workspace">
-        <aside className="sidebar">
+        {sidebarOpen && (
+          <button
+            type="button"
+            className="sidebar-backdrop"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Fechar painel de pessoas"
+          />
+        )}
+
+        <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
           <div className="sidebar-heading">
             <div>
               <h2>Pessoas</h2>
               <p>{people.length} nomes disponíveis</p>
             </div>
+            <button
+              type="button"
+              className="close-sidebar-button"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Fechar painel de pessoas"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className={`sidebar-sync sync-${syncStatus}`} title={syncError || 'Alterações compartilhadas pelo Cloud Firestore'}>
+            <span className="sync-dot" />
+            {statusLabel}
+          </div>
+
+          <div className="sidebar-tools">
+            <div className="legend" aria-label="Legenda de carga">
+              <span><i className="dot safe-dot" />1 função</span>
+              <span><i className="dot warning-dot" />2 funções</span>
+              <span><i className="dot danger-dot" />3 ou mais</span>
+            </div>
+            <button type="button" className="restore-button" onClick={resetBoard}>Restaurar painel</button>
           </div>
 
           <button
