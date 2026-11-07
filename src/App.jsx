@@ -12,6 +12,17 @@ const BOARD_DOCUMENT = doc(db, 'app_ipcvt', 'planner_dados')
 const SCALE_DOCUMENT = doc(db, 'app_ipcvt', 'escala_geral_dados')
 const ACCESS_SESSION_KEY = 'nucleo-ipcvt-planner-access'
 const ACCESS_PASSWORD = 'ipcvt0509'
+const PORTAL_URL = 'https://nucleoipcvt.github.io/Portal/'
+const COMMISSION_URL = PORTAL_URL + 'comissao.html'
+
+function PortalNavigation() {
+  return (
+    <nav className="portal-navigation" aria-label="Portais IPCVT">
+      <a href={PORTAL_URL}>← Portal IPCVT</a>
+      <a href={COMMISSION_URL}>← Portal Comissão IPCVT</a>
+    </nav>
+  )
+}
 
 function readSavedData() {
   try {
@@ -270,7 +281,12 @@ export default function App() {
 
   if (!hasAccess) {
     return (
-      <main className="access-page">
+      <div className="access-shell">
+        <header className="topbar">
+          <a className="tactical-brand" href="/" aria-label="Início do Planejamento Tático">Planejamento Tático</a>
+        </header>
+        <div className="portal-links-bar"><PortalNavigation /></div>
+        <main className="access-page">
         <form className="access-card" onSubmit={unlock}>
           <p className="eyebrow access-eyebrow">IPCVT</p>
           <h1>Núcleo Planner</h1>
@@ -286,7 +302,8 @@ export default function App() {
           {passwordError && <div className="password-error">{passwordError}</div>}
           <button type="submit" className="access-button">Entrar</button>
         </form>
-      </main>
+        </main>
+      </div>
     )
   }
 
@@ -310,7 +327,9 @@ export default function App() {
           <span className="menu-icon" aria-hidden="true">☰</span>
           Pessoas
         </button>
+        <a className="tactical-brand" href="/" aria-label="Início do Planejamento Tático">Planejamento Tático</a>
       </header>
+      <div className="portal-links-bar"><PortalNavigation /></div>
 
       {syncStatus === 'error' && (
         <div className="sync-alert" role="alert">
