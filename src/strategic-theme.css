@@ -1,0 +1,153 @@
+/* Identidade visual alinhada ao Planner da IPCVT, sem alterar o quadro de equipes. */
+:root {
+  color-scheme: light;
+  --strategic-green: #173f35;
+  --strategic-green-strong: #103027;
+  --strategic-gold: #b4934f;
+  --strategic-cream: #f7f7f2;
+  --strategic-surface: #ffffff;
+  --strategic-line: #dfe6de;
+  --strategic-ink: #24372f;
+  --strategic-muted: #64756b;
+  background: var(--strategic-cream);
+  color: var(--strategic-ink);
+}
+
+html, body { background: var(--strategic-cream); color: var(--strategic-ink); }
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 3px solid var(--strategic-gold);
+  outline-offset: 2px;
+}
+.topbar {
+  background: var(--strategic-green);
+  box-shadow: 0 3px 12px #173f3526;
+  gap: 12px;
+}
+.tactical-brand { margin-left: 0; font-size: 14px; letter-spacing: -.015em; }
+.portal-links-bar { background: var(--strategic-green-strong); border-bottom-color: #b4934f55; }
+.portal-navigation a { border-color: #ffffff2c; }
+.board { background: var(--strategic-cream); }
+.area-section {
+  border-color: var(--strategic-line);
+  background: #ffffffc9;
+  box-shadow: 0 6px 18px #173f3508;
+}
+.area-title-row h2 { color: var(--strategic-ink); }
+.area-title-row span { color: var(--strategic-muted); }
+.role-box, .person-card { background: var(--strategic-surface); }
+.role-box { border-color: var(--strategic-line); }
+.role-header { background: #f3f5f0; border-bottom-color: var(--strategic-line); }
+.role-header h3 { color: var(--strategic-ink); }
+.empty-message { background: #f9faf6; border-color: #d3ded2; color: #6c8072; }
+.sidebar { background: #fff; border-color: var(--strategic-line); }
+.sidebar h2 { color: var(--strategic-green); }
+.sidebar-heading p, .drag-help { color: var(--strategic-muted); }
+.sidebar-tools { background: #f9faf6; border-color: var(--strategic-line); }
+.new-person-form button, .import-button, .access-button { background: var(--strategic-green); }
+.new-person-form button:hover, .import-button:hover, .access-button:hover { background: var(--strategic-green-strong); }
+.search-input:focus, .new-person-form input:focus { border-color: var(--strategic-green); }
+.access-page {
+  background: radial-gradient(circle at 50% 0, #ebf1e9, var(--strategic-cream) 60%);
+}
+.access-card {
+  border-color: var(--strategic-line);
+  box-shadow: 0 18px 55px #173f3512;
+}
+.access-card h1 {
+  color: var(--strategic-green);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(34px, 6vw, 44px);
+  font-weight: 600;
+  letter-spacing: -.035em;
+  line-height: 1.02;
+}
+.access-eyebrow { color: var(--strategic-gold); opacity: 1; }
+.access-card p:not(.eyebrow) { color: var(--strategic-muted); }
+.access-button { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.google-mark { display: inline-grid; place-items: center; width: 22px; height: 22px; background: white; color: #4285f4; border-radius: 50%; font-weight: 900; }
+.access-pending { margin: 20px 0; padding: 15px; border: 1px solid var(--strategic-line); border-radius: 11px; background: #f5f6ef; text-align: center; }
+.access-pending strong, .access-pending span { display: block; overflow-wrap: anywhere; }
+.access-pending span { margin-top: 5px; font-size: 12px; }
+.access-pending p { margin-bottom: 0; font-size: 12px; }
+.access-message { margin-top: 18px; text-align: center; font-size: 13px; }
+.access-switch, .theme-switch, .session-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #ffffff4d;
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: #ffffff13;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+.access-switch { width: 100%; margin-top: 10px; border-color: var(--strategic-line); background: white; color: var(--strategic-green); }
+.access-switch:hover { background: #eff3ed; }
+.theme-switch:hover, .session-logout:hover { background: #ffffff28; }
+.access-shell .topbar .theme-switch { margin-left: auto; }
+.session-actions { display: flex; align-items: center; gap: 8px; min-width: 0; margin-left: auto; }
+.session-email { max-width: 250px; color: #e2efe6; font-size: 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.sidebar-sync { background: #eff4ee; }
+
+/* Versão grafite: mesmo conceito do tema noturno do Planner. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --strategic-green: #304b3d;
+  --strategic-green-strong: #202c27;
+  --strategic-gold: #d7b778;
+  --strategic-cream: #171a1e;
+  --strategic-surface: #24292e;
+  --strategic-line: #3d474e;
+  --strategic-ink: #edf1f2;
+  --strategic-muted: #adb8bd;
+}
+:root[data-theme="dark"] .topbar { background: #26362d; box-shadow: 0 3px 12px #0006; }
+:root[data-theme="dark"] .portal-links-bar { background: #20252a; }
+:root[data-theme="dark"] .area-section { background: #20252a; border-color: #3d474e; box-shadow: 0 5px 20px #0003; }
+:root[data-theme="dark"] .area-title-row h2 { color: #edf1f2; }
+:root[data-theme="dark"] .area-title-row span { color: #abb7b4; }
+:root[data-theme="dark"] .area-comissao { --area-accent: #b7a4f0; }
+:root[data-theme="dark"] .area-tecnica { --area-accent: #8dbde3; }
+:root[data-theme="dark"] .area-midia { --area-accent: #e5a590; }
+:root[data-theme="dark"] .area-musica { --area-accent: #9ed4b0; }
+:root[data-theme="dark"] .role-box { background: #24292e; border-color: #445057; box-shadow: 0 3px 12px #0003; }
+:root[data-theme="dark"] .role-header { background: #30373d; border-bottom-color: #445057; }
+:root[data-theme="dark"] .role-header h3 { color: #edf1f2; }
+:root[data-theme="dark"] .role-header span { background: #20282b; }
+:root[data-theme="dark"] .empty-message { background: #20262a; border-color: #566168; color: #a9b6b6; }
+:root[data-theme="dark"] .person-card { background: #30373d; color: #edf1f2; border-color: color-mix(in srgb, var(--load-color) 45%, #556168); box-shadow: 0 2px 7px #0003; }
+:root[data-theme="dark"] .person-card.possible { background: #283036; }
+:root[data-theme="dark"] .person-card.selected { background: #344b3e; color: #ebf6ef; border-color: #88bc9c; box-shadow: 0 0 0 3px #88bc9c24; }
+:root[data-theme="dark"] .person-card .function-count { background: #20262a; color: #c7d3cf; }
+:root[data-theme="dark"] .person-card.safe .function-count,
+:root[data-theme="dark"] .person-card.warning .function-count,
+:root[data-theme="dark"] .person-card.danger .function-count { background: #24292e; color: #edf1f2; }
+:root[data-theme="dark"] .sidebar { background: #24292e; border-color: #3d474e; box-shadow: 16px 0 38px #0006; }
+:root[data-theme="dark"] .sidebar h2 { color: #bcdcc9; }
+:root[data-theme="dark"] .sidebar-heading p, :root[data-theme="dark"] .drag-help { color: #aeb9b7; }
+:root[data-theme="dark"] .sidebar-tools { background: #2d353a; border-color: #3d474e; }
+:root[data-theme="dark"] .sidebar-tools .legend { color: #bdc9c5; }
+:root[data-theme="dark"] .search-input, :root[data-theme="dark"] .new-person-form input { background: #191f23; color: #edf1f2; border-color: #4a565d; }
+:root[data-theme="dark"] .search-input::placeholder, :root[data-theme="dark"] .new-person-form input::placeholder { color: #929fa1; }
+:root[data-theme="dark"] .restore-button, :root[data-theme="dark"] .close-sidebar-button { background: #30373d; color: #dae6df; border-color: #526069; }
+:root[data-theme="dark"] .restore-button:hover, :root[data-theme="dark"] .close-sidebar-button:hover { background: #394349; }
+:root[data-theme="dark"] .sidebar-sync { background: #30373d; }
+:root[data-theme="dark"] .access-page { background: radial-gradient(circle at top, #283b33, #171a1e 64%); }
+:root[data-theme="dark"] .access-card { background: #24292e; border-color: #3d474e; box-shadow: 0 18px 55px #0005; }
+:root[data-theme="dark"] .access-card h1 { color: #bcdcc9; }
+:root[data-theme="dark"] .access-card p:not(.eyebrow) { color: #b4c0bf; }
+:root[data-theme="dark"] .access-pending { background: #2d353a; border-color: #526069; }
+:root[data-theme="dark"] .access-switch { background: #30373d; color: #dce9df; border-color: #526069; }
+:root[data-theme="dark"] .access-switch:hover { background: #394349; }
+:root[data-theme="dark"] .import-button, :root[data-theme="dark"] .new-person-form button, :root[data-theme="dark"] .access-button { background: #35674f; }
+:root[data-theme="dark"] .import-button:hover, :root[data-theme="dark"] .new-person-form button:hover, :root[data-theme="dark"] .access-button:hover { background: #417b5f; }
+
+@media (max-width: 700px) {
+  .session-email { display: none; }
+  .session-actions { gap: 4px; }
+  .theme-switch, .session-logout { font-size: 10px; padding: 7px 8px; }
+}
+@media (max-width: 390px) { .tactical-brand { font-size: 11px; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }

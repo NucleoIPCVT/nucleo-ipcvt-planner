@@ -1,19 +1,40 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { browserLocalPersistence, GoogleAuthProvider, onAuthStateChanged, setPersistence, signInWithPopup, signOut } from 'firebase/auth'
 import { doc, getDoc, onSnapshot, serverTimestamp, setDoc } from 'firebase/firestore'
 import PersonCard from './components/PersonCard.jsx'
 import RoleBox from './components/RoleBox.jsx'
 import { people as initialPeople } from './data/people.js'
 import { areas } from './data/areas.js'
 import { initialAssignments } from './data/initialAssignments.js'
-import { db } from './firebase.js'
+import { auth, db } from './firebase.js'
 
 const STORAGE_KEY = 'nucleo-ipcvt-planner-v1'
 const BOARD_DOCUMENT = doc(db, 'app_ipcvt', 'planner_dados')
 const SCALE_DOCUMENT = doc(db, 'app_ipcvt', 'escala_geral_dados')
-const ACCESS_SESSION_KEY = 'nucleo-ipcvt-planner-access'
-const ACCESS_PASSWORD = 'ipcvt0509'
+const ACCESS_COLLECTION = 'tatico_acessos'
+const THEME_STORAGE_KEY = 'ipcvt-estrategico-tema'
 const PORTAL_URL = 'https://nucleoipcvt.github.io/Portal/'
 const COMMISSION_URL = PORTAL_URL + 'comissao.html'
+const googleProvider = new GoogleAuthProvider()
+googleProvider.setCustomParameters({ prompt: 'select_account' })
+
+function getInitialTheme() {
+  try {
+    const preference = localStorage.getItem(THEME_STORAGE_KEY)
+    if (preference === 'dark' || preference === 'light') return preference
+  } catch { /* O tema continua disponível mesmo sem armazenamento. */ }
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
+
+function loginErrorMessage(error) {
+  switch (error?.code) {
+    case 'auth/popup-closed-by-user': return 'O login foi cancelado. Você pode tentar novamente.'
+    case 'auth/popup-blocked': return 'Autorize a janela de login do Google no seu navegador.'
+    case 'auth/unauthorized-domain': return 'Este endereço precisa ser autorizado no Firebase Authentication.'
+    case 'auth/operation-not-allowed': return 'O acesso com Google precisa ser ativado no Firebase.'
+    default: return 'Não foi possível entrar com Google. Tente novamente.'
+  }
+}
 
 function PortalNavigation() {
   return (
@@ -73,9 +94,12 @@ function collectNames(value, result = new Set()) {
 }
 
 export default function App() {
-  const [hasAccess, setHasAccess] = useState(() => sessionStorage.getItem(ACCESS_SESSION_KEY) === 'granted')
-  const [password, setPassword] = useState('')
-  const [passwordError, setPasswordError] = useState('')
+  const [accessState, setAccessState] = useState('checking')
+  const [accessEmail, setAccessEmail] = useState('')
+  const [accessError, setAccessError] = useState('')
+  const [authBusy, setAuthBusy] = useState(false)
+  const [theme, setTheme] = useState(getInitialTheme)
+  const hasAccess = accessState === 'allowed'
   const localData = useMemo(() => readSavedData(), [])
   const [people, setPeople] = useState(localData?.people ?? initialPeople)
   const [assignments, setAssignments] = useState(localData?.assignments ?? initialAssignments)
@@ -89,6 +113,66 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const saveTimer = useRef(null)
   const applyingRemoteData = useRef(false)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#20252a' : '#173f35')
+    try { localStorage.setItem(THEME_STORAGE_KEY, theme) } catch { /* Preferência opcional. */ }
+  }, [theme])
+
+  useEffect(() => {
+    let sequence = 0
+    let stopAuthorization = null
+    const stopAuth = onAuthStateChanged(auth, async (user) => {
+      const current = ++sequence
+      stopAuthorization?.()
+      stopAuthorization = null
+      setCloudReady(false)
+      setAccessState('checking')
+      setAccessError('')
+      setAccessEmail('')
+
+      if (!user) {
+        setAccessState('signed-out')
+        return
+      }
+
+      try {
+        const token = await user.getIdTokenResult()
+        if (current !== sequence) return
+        if (!user.email || !user.emailVerified || token.claims.firebase?.sign_in_provider !== 'google.com') {
+          setAccessState('invalid-provider')
+          return
+        }
+
+        const email = user.email.trim().toLowerCase()
+        setAccessEmail(email)
+        stopAuthorization = onSnapshot(doc(db, ACCESS_COLLECTION, email), (snapshot) => {
+          if (current !== sequence) return
+          setAccessState(snapshot.exists() && snapshot.data().ativo === true ? 'allowed' : 'pending')
+        }, (error) => {
+          if (current !== sequence) return
+          setAccessState('error')
+          setAccessError(error.code === 'permission-denied'
+            ? 'Falta liberar a leitura das autorizações nas regras do Firebase.'
+            : 'Não foi possível conferir sua autorização. Tente novamente.')
+        })
+      } catch {
+        if (current !== sequence) return
+        setAccessState('error')
+        setAccessError('Não foi possível validar sua conta Google.')
+      }
+    }, () => {
+      setAccessState('error')
+      setAccessError('Não foi possível verificar sua sessão.')
+    })
+
+    return () => {
+      ++sequence
+      stopAuthorization?.()
+      stopAuth()
+    }
+  }, [])
 
   useEffect(() => {
     if (!hasAccess) return undefined
@@ -224,16 +308,28 @@ export default function App() {
     setNewName('')
   }
 
-  function unlock(event) {
-    event.preventDefault()
-    if (password === ACCESS_PASSWORD) {
-      sessionStorage.setItem(ACCESS_SESSION_KEY, 'granted')
-      setHasAccess(true)
-      setPassword('')
-      setPasswordError('')
-      return
+  async function loginWithGoogle() {
+    setAuthBusy(true)
+    setAccessError('')
+    try {
+      await setPersistence(auth, browserLocalPersistence)
+      await signInWithPopup(auth, googleProvider)
+    } catch (error) {
+      setAccessError(loginErrorMessage(error))
+    } finally {
+      setAuthBusy(false)
     }
-    setPasswordError('Senha incorreta.')
+  }
+
+  async function logout() {
+    setAuthBusy(true)
+    try {
+      await signOut(auth)
+    } catch {
+      setAccessError('Não foi possível sair da conta. Tente novamente.')
+    } finally {
+      setAuthBusy(false)
+    }
   }
 
   async function importPeopleFromScale() {
@@ -283,25 +379,24 @@ export default function App() {
     return (
       <div className="access-shell">
         <header className="topbar">
-          <a className="tactical-brand" href="/" aria-label="Início do Planejamento Tático">Planejamento Tático</a>
+          <a className="tactical-brand" href="./" aria-label="Início do Planejamento Estratégico">Planejamento Estratégico</a>
+          <button className="theme-switch" type="button" aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo noturno'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span> {theme === 'dark' ? 'Modo claro' : 'Modo noturno'}
+          </button>
         </header>
         <div className="portal-links-bar"><PortalNavigation /></div>
         <main className="access-page">
-        <form className="access-card" onSubmit={unlock}>
+        <section className="access-card" aria-labelledby="access-title">
           <p className="eyebrow access-eyebrow">IPCVT</p>
-          <h1>Núcleo Planner</h1>
-          <p>Digite a senha compartilhada para acessar o painel de brainstorm.</p>
-          <label htmlFor="access-password">Senha de acesso</label>
-          <input
-            id="access-password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoFocus
-          />
-          {passwordError && <div className="password-error">{passwordError}</div>}
-          <button type="submit" className="access-button">Entrar</button>
-        </form>
+          <h1 id="access-title">Planejamento Estratégico</h1>
+          <p>Organize as equipes, experimente combinações e distribua integrantes entre funções.</p>
+          {accessState === 'checking' && <p className="access-message" role="status">Verificando seu acesso…</p>}
+          {accessState === 'pending' && <div className="access-pending" role="status"><strong>Aguardando autorização</strong><span>{accessEmail}</span><p>Peça à coordenação para liberar seu e-mail em “Administrar autorizações” → “Planejamento Estratégico”.</p></div>}
+          {accessState === 'invalid-provider' && <p className="access-message">Entre com uma conta Google que tenha e-mail verificado.</p>}
+          {accessError && <p className="password-error" role="alert">{accessError}</p>}
+          {accessState === 'signed-out' && <button type="button" className="access-button" disabled={authBusy} onClick={loginWithGoogle}><span className="google-mark" aria-hidden="true">G</span> Entrar com Google</button>}
+          {accessState !== 'checking' && accessState !== 'signed-out' && <button type="button" className="access-switch" disabled={authBusy} onClick={logout}>Usar outra conta Google</button>}
+        </section>
         </main>
       </div>
     )
@@ -327,7 +422,12 @@ export default function App() {
           <span className="menu-icon" aria-hidden="true">☰</span>
           Pessoas
         </button>
-        <a className="tactical-brand" href="/" aria-label="Início do Planejamento Tático">Planejamento Tático</a>
+        <a className="tactical-brand" href="./" aria-label="Início do Planejamento Estratégico">Planejamento Estratégico</a>
+        <div className="session-actions">
+          <span className="session-email" title={accessEmail}>{accessEmail}</span>
+          <button type="button" className="theme-switch" aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo noturno'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}><span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span> {theme === 'dark' ? 'Claro' : 'Noturno'}</button>
+          <button type="button" className="session-logout" disabled={authBusy} onClick={logout}>Sair</button>
+        </div>
       </header>
       <div className="portal-links-bar"><PortalNavigation /></div>
 
